@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulasi Maket Smart Kitchen</title>
+<style>
+:root{--bg:#eef2f7;--panel:#fff;--ink:#14202e;--mute:#5b6b7e;--line:#c5d0de;--room:#f7fafc;--eq:#e3eaf3;--eqs:#8aa0b8;--accent:#0f8fa6;--ok:#1fa463;--warn:#e0a100;--bad:#d9382f;--smoke:#7c8794;--gas:#d98a00;--air:#2b7fd6;--fan:#6b5fd1;--flame:#f08a24;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1722;--panel:#112233;--ink:#e8f0f8;--mute:#93a6bb;--line:#2c4560;--room:#0e1d2c;--eq:#1f3a52;--eqs:#6f8fae;--accent:#37d0d0;--smoke:#a9b4c0;--gas:#f2b73c;--air:#5aa9f5;--fan:#8a7ff0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b1722;--panel:#112233;--ink:#e8f0f8;--mute:#93a6bb;--line:#2c4560;--room:#0e1d2c;--eq:#1f3a52;--eqs:#6f8fae;--accent:#37d0d0;--smoke:#a9b4c0;--gas:#f2b73c;--air:#5aa9f5;--fan:#8a7ff0;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1{font-size:18px;margin:0 0 2px;letter-spacing:.3px}
+.wrap{max-width:1180px;margin:auto;padding:14px;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+.sub{color:var(--mute);font-size:12px}
+svg{width:100%;height:auto;display:block}
+svg text{fill:var(--ink);font-family:inherit}
+.room{fill:var(--room);stroke:var(--eqs);stroke-dasharray:6 5;stroke-width:1.4}
+.eq{fill:var(--eq);stroke:var(--eqs);stroke-width:1.4}
+.lbl{font-size:11px;fill:var(--mute)!important}
+.sb{fill:var(--eq);stroke:var(--accent);stroke-width:1.8}
+.sb.warn{stroke:var(--warn)}.sb.bad{stroke:var(--bad)}
+.ps{fill:var(--smoke)}.pgas{fill:var(--gas)}
+.flow{fill:none;stroke:var(--air);stroke-width:2;stroke-dasharray:4 7;stroke-linecap:round;animation:dash 1s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-22}}
+.pipe{fill:none;stroke:var(--eqs);stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.pipef{fill:none;stroke:var(--gas);stroke-width:2;stroke-dasharray:3 8;animation:dash .9s linear infinite}
+.wifi{stroke:var(--air);stroke-width:2;stroke-dasharray:4 5;animation:dash 1s linear infinite}
+#btn{cursor:pointer}
+.row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+button.b{background:var(--eq);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;cursor:pointer}
+button.b.on{background:var(--accent);color:#04202a;border-color:var(--accent);font-weight:600}
+.ctl{margin:9px 0}.ctl label{display:flex;justify-content:space-between;font-size:13px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.tile{background:var(--eq);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
+.tile small{display:block;color:var(--mute);font-size:11px}
+.tile b{font-size:19px}
+.tile.warn{border-color:var(--warn)}.tile.bad{border-color:var(--bad)}
+.banner{border-radius:10px;padding:9px 12px;font-weight:600;margin-bottom:8px;border:1px solid var(--line);background:var(--eq)}
+.banner.ok{border-color:var(--ok);color:var(--ok)}.banner.warn{border-color:var(--warn);color:var(--warn)}.banner.bad{border-color:var(--bad);color:var(--bad)}
+#log{margin:6px 0 0;padding:0;list-style:none;font-size:12px;color:var(--mute);max-height:92px;overflow:auto}
+.cap{margin-top:8px}
+.sc{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.lbar{position:relative;height:14px;border-radius:7px;margin:12px 0 4px;background:linear-gradient(90deg,var(--ok) 0 16.7%,var(--bad) 16.7% 88%,var(--smoke) 88%)}
+.lbar i{position:absolute;top:-4px;left:0;width:4px;height:22px;background:var(--ink);border-radius:2px}
+.narr{background:var(--eq);border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin:8px 0;min-height:42px}
+.rt{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}.rt th,.rt td{border:1px solid var(--line);padding:5px 8px;text-align:left}
+svg.wrecked .eq{opacity:.6}
+.phh{display:flex;justify-content:space-between;align-items:center;background:var(--eq);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin-bottom:8px;font-size:13px}
+.phh span{color:var(--ok);font-size:12px}
+.toast{display:none;border-radius:10px;padding:8px 10px;margin-bottom:6px;background:var(--bad);color:#fff;font-weight:600;font-size:13px}.toast.show{display:block}
+.al{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0;background:var(--eq)}
+.al small{color:var(--mute);font-size:11.5px}
+.al .pill{font-size:11px;font-weight:700;border:1px solid var(--ok);color:var(--ok);border-radius:99px;padding:2px 8px;white-space:nowrap}
+.al.on{border-color:var(--bad);animation:pl 1s infinite}.al.on b,.al.on small{color:var(--bad)}.al.on .pill{background:var(--bad);border-color:var(--bad);color:#fff}
+@keyframes pl{50%{box-shadow:0 0 0 3px rgba(217,56,47,.35)}}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:10px}
+.mc{background:var(--eq);border:1px solid var(--line);border-radius:10px;padding:10px;cursor:pointer}
+.mc.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.mc h3{margin:0 0 4px;font-size:14px;color:var(--accent)}
+.mc p{margin:0 0 6px;font-size:12.5px;color:var(--mute)}
+.mc code{display:block;font-size:12px;margin-bottom:6px;font-family:ui-monospace,Menlo,Consolas,monospace}
+.mc .live{font-size:12.5px;font-variant-numeric:tabular-nums;border-top:1px dashed var(--line);padding-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="card">
+<h1>MAKET SMART KITCHEN · Simulasi Interaktif</h1>
+<div class="sub">Exhaust fan langsung di corong lebar atas kompor (tanpa lorong/pipa kecil). Klik tombol di dekat kompor untuk mode semi-otomatis.</div>
+<svg id="sim" viewBox="0 0 660 420" role="img" aria-label="Simulasi maket smart kitchen">
+<rect class="room" x="20" y="40" width="600" height="350" rx="10"/>
+<rect id="gasL" x="21" y="390" width="598" height="0" fill="var(--gas)" opacity=".22"/>
+<text class="lbl" x="32" y="60">Ruang dapur</text>
+<rect class="eq" x="195" y="8" width="30" height="152"/>
+<text x="234" y="26" style="font-size:11px">Keluar (asap + gas)</text>
+<path d="M210 38 V14" stroke="var(--eqs)" stroke-width="2" fill="none"/>
+<polygon class="eq" points="120,300 300,300 250,205 170,205"/>
+<g id="pipeG"><path class="pipe" d="M312 380 H30 V185 H184"/><path id="pipeF" class="pipef" d="M312 380 H30 V185 H184"/><rect class="eq" x="304" y="368" width="14" height="22" rx="3"/><text class="lbl" x="40" y="405">Pipa gas: intake di dekat tabung LPG, tersambung ke exhaust fan</text></g>
+<g id="flows" opacity="0"><path class="flow" d="M210 322 V215"/><path class="flow" d="M150 322 Q170 250 195 212"/><path class="flow" d="M270 322 Q250 250 225 212"/></g>
+<rect class="eq" x="140" y="340" width="140" height="34" rx="6"/>
+<text x="210" y="362" text-anchor="middle" style="font-size:12px;font-weight:600">Kompor</text>
+<g id="tankG"><path d="M328 318 C305 318 292 338 280 354" fill="none" stroke="var(--eqs)" stroke-width="3"/><rect class="eq" x="328" y="314" width="12" height="12" rx="2"/><rect class="eq" x="324" y="326" width="46" height="60" rx="14"/><path d="M324 346 H370" stroke="var(--eqs)"/><text x="347" y="371" text-anchor="middle" style="font-size:11px;font-weight:700">LPG</text><text class="lbl" x="347" y="306" text-anchor="middle">Tabung gas</text><circle id="leak" cx="326" cy="320" r="5" fill="var(--gas)" opacity="0"/></g>
+<g id="flame"></g>
+<g id="pg"></g>
+<g id="fanG"><circle cx="210" cy="185" r="27" class="eq"/><g id="blades" fill="var(--fan)" opacity=".85"><ellipse cx="210" cy="171" rx="5" ry="11"/><ellipse cx="210" cy="199" rx="5" ry="11"/><ellipse cx="196" cy="185" rx="11" ry="5"/><ellipse cx="224" cy="185" rx="11" ry="5"/><ellipse cx="200" cy="175" rx="5" ry="10" transform="rotate(-45 200 175)"/><ellipse cx="220" cy="195" rx="5" ry="10" transform="rotate(-45 220 195)"/></g><circle cx="210" cy="185" r="4" fill="var(--ink)"/></g>
+<text x="244" y="180" style="font-size:11px">Exhaust fan</text>
+<text class="lbl" x="244" y="193">langsung di corong</text>
+<text class="lbl" x="272" y="238">Corong lebar (Ø 5 cm)</text>
+<rect id="bMq135" class="sb" x="44" y="222" width="68" height="34" rx="6"/>
+<text x="78" y="236" text-anchor="middle" style="font-size:9.5px">MQ-135</text><text id="tMq135" x="78" y="250" text-anchor="middle" style="font-size:11px;font-weight:700">400</text>
+<rect id="bMq2" class="sb" x="44" y="262" width="68" height="34" rx="6"/>
+<text x="78" y="276" text-anchor="middle" style="font-size:9.5px">MQ-2</text><text id="tMq2" x="78" y="290" text-anchor="middle" style="font-size:11px;font-weight:700">100</text>
+<rect id="bDht" class="sb" x="330" y="250" width="76" height="34" rx="6"/>
+<text x="368" y="264" text-anchor="middle" style="font-size:9.5px">DHT22</text><text id="tDht" x="368" y="278" text-anchor="middle" style="font-size:11px;font-weight:700">28°C</text>
+<g id="btn"><circle id="btnC" cx="78" cy="362" r="13" class="sb"/><circle id="btnD" cx="78" cy="362" r="6" fill="var(--eqs)"/></g>
+<text x="78" y="340" text-anchor="middle" style="font-size:12px;font-weight:600">Tombol</text>
+<text class="lbl" x="470" y="68" text-anchor="middle">Buzzer</text>
+<circle id="bz" cx="470" cy="95" r="16" class="eq"/><circle cx="470" cy="95" r="5" fill="var(--ink)"/>
+<text class="lbl" x="566" y="68" text-anchor="middle">LED</text>
+<circle id="l1" cx="540" cy="95" r="10" class="eq"/><circle id="l2" cx="566" cy="95" r="10" class="eq"/><circle id="l3" cx="592" cy="95" r="10" class="eq"/>
+<path d="M470 111 V128 H566 V105 M505 128 V150" stroke="var(--eqs)" stroke-width="1.6" fill="none"/>
+<rect class="eq" x="430" y="150" width="150" height="40" rx="6"/><text x="505" y="175" text-anchor="middle" style="font-size:12px;font-weight:700">Arduino Uno R3</text>
+<path d="M505 190 V225" stroke="var(--eqs)" stroke-width="1.6"/><text class="lbl" x="515" y="212">serial</text>
+<rect class="eq" x="430" y="225" width="150" height="40" rx="6"/><text x="505" y="250" text-anchor="middle" style="font-size:12px;font-weight:700">ESP32 (Wi-Fi)</text>
+<line class="wifi" x1="580" y1="245" x2="656" y2="245"/><text class="lbl" x="618" y="237" text-anchor="middle">Wi-Fi</text>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--accent)"/></marker></defs>
+<circle id="w1" cx="470" cy="95" r="16" fill="none" stroke="var(--bad)" stroke-width="2" opacity="0"/><circle id="w2" cx="470" cy="95" r="16" fill="none" stroke="var(--bad)" stroke-width="2" opacity="0"/>
+<g id="vecG" style="display:none" fill="none" stroke-width="2.5"><path id="vy" stroke="var(--accent)" marker-end="url(#ar)"/><path id="vx" stroke="var(--air)" marker-end="url(#ar)"/><path id="vr" stroke="var(--bad)" marker-end="url(#ar)"/></g>
+<rect id="hl" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="6 4" rx="8"/>
+<defs><radialGradient id="fb"><stop offset="0" stop-color="#fff6c0"/><stop offset=".4" stop-color="#ffb02e"/><stop offset=".8" stop-color="#e8431a"/><stop offset="1" stop-color="#e8431a" stop-opacity="0"/></radialGradient></defs>
+<g id="exG" pointer-events="none"><circle id="exB" cx="230" cy="335" r="0" fill="url(#fb)" opacity="0"/><circle id="exR1" cx="230" cy="335" r="0" fill="none" stroke="var(--flame)" stroke-width="5" opacity="0"/><circle id="exR2" cx="230" cy="335" r="0" fill="none" stroke="var(--ink)" stroke-width="3" opacity="0"/><g id="deb"></g><rect id="exFl" x="0" y="0" width="660" height="420" fill="#fff4d0" opacity="0"/><text id="exT" x="330" y="215" text-anchor="middle" style="font-size:44px;font-weight:800;fill:var(--bad)" opacity="0">LEDAKAN!</text></g>
+</svg>
+<div class="sub cap">Biru = aliran udara. Titik abu = asap, titik kuning = gas LPG. Kipas menyala otomatis kalau suhu naik atau asap/gas melewati ambang.</div>
+<div class="sc">
+<div class="phh"><b>Simulasi otomatis: gas meledak</b><span id="scS">siap</span></div>
+<div class="row"><button class="b" id="scA">Tanpa pengaman</button><button class="b" id="scB">Dengan Smart Kitchen</button><button class="b" id="scAB">Bandingkan keduanya</button><button class="b" id="scR">Reset</button><select class="b" id="scSp"><option value="1">1x</option><option value="2" selected>2x</option><option value="3">3x</option></select></div>
+<div class="lbar"><i id="lelF"></i></div>
+<div class="sub" style="display:flex;justify-content:space-between"><span>0%</span><span>LEL 100% (≈1,8% volume)</span><span>UEL ≈528% (≈9,5%)</span></div>
+<div id="lelT" style="font-weight:600;margin-top:4px"></div>
+<div id="narr" class="narr">Pilih skenario, lalu simulasi berjalan sendiri: kebocoran, gas menumpuk, sumber api, dan hasilnya.</div>
+<div id="scRes"></div>
+<div class="sub" style="margin-top:6px">Kaitan fisika: kalor pembakaran jadi energi kinetik gas panas (Kerja dan Energi), gas memuai mendadak sehingga tekanan naik (Mekanika fluida), gelombang kejut merambat seperti gelombang bunyi (Getaran), serpihan terlempar (Kinematika dan Dinamika Partikel). Skala 100% LEL = 1000 satuan simulasi, bukan data eksperimen.</div>
+</div>
+</section>
+
+<aside>
+<div class="card">
+<div class="phh"><b>Blynk · Smart Kitchen</b><span>● ESP32 online (V0 sampai V5)</span></div><div id="toast" class="toast"></div>
+<div id="banner" class="banner ok">AMAN</div>
+<div id="alerts"><div class="al" id="al_gas"><div><b>Gas LPG bocor</b><br><small id="ad_gas"></small></div><span class="pill" id="as_gas">AMAN</span></div><div class="al" id="al_smoke"><div><b>Asap / masakan gosong</b><br><small id="ad_smoke"></small></div><span class="pill" id="as_smoke">AMAN</span></div><div class="al" id="al_temp"><div><b>Suhu ruang melebihi batas normal</b><br><small id="ad_temp"></small></div><span class="pill" id="as_temp">AMAN</span></div></div>
+<div class="tiles">
+<div class="tile" id="v0"><small>V0 Suhu</small><b>-</b></div>
+<div class="tile" id="v1"><small>V1 Kelembapan</small><b>-</b></div>
+<div class="tile" id="v2"><small>V2 MQ-2</small><b>-</b></div>
+<div class="tile" id="v3"><small>V3 MQ-135</small><b>-</b></div>
+<div class="tile" id="v4"><small>V4 Kipas</small><b>-</b></div>
+<div class="tile" id="v5"><small>V5 Alarm</small><b>-</b></div>
+</div>
+<div class="sub" style="margin-top:8px">Grafik: suhu V0 (oranye) dan MQ-2 V2 (biru-hijau), garis putus = ambang</div>
+<svg viewBox="0 0 300 90" style="background:var(--eq);border-radius:8px"><line x1="0" x2="300" y1="48.5" y2="48.5" stroke="var(--flame)" stroke-dasharray="3 3" opacity=".6"/><line x1="0" x2="300" y1="61.3" y2="61.3" stroke="var(--accent)" stroke-dasharray="3 3" opacity=".6"/><polyline id="pT" fill="none" stroke="var(--flame)" stroke-width="2"/><polyline id="pG" fill="none" stroke="var(--accent)" stroke-width="2"/></svg>
+<div class="sub" style="margin-top:6px">Event log</div><ul id="log"></ul>
+</div>
+
+<div class="card" style="margin-top:14px">
+<div class="sub">Mode kipas</div>
+<div class="row"><button class="b on" id="mAuto">Otomatis</button><button class="b" id="mSemi">Semi-otomatis (tombol)</button></div>
+<div class="sub">Preset</div>
+<div class="row"><button class="b" data-p="0,0,0,28">Normal</button><button class="b" data-p="45,8,0,28">Masak</button><button class="b" data-p="60,55,0,28">Asap tebal</button><button class="b" data-p="0,0,40,28">Gas bocor</button></div>
+<div class="ctl"><label>Api kompor <span id="oFlame">0%</span></label><input type="range" id="sFlame" min="0" max="100" value="0"></div>
+<div class="ctl"><label>Asap masakan <span id="oSmoke">0%</span></label><input type="range" id="sSmoke" min="0" max="100" value="0"></div>
+<div class="ctl"><label>Kebocoran gas LPG <span id="oGas">0%</span></label><input type="range" id="sGas" min="0" max="100" value="0"></div>
+<div class="ctl"><label>Suhu ruang <span id="oAmb">28°C</span></label><input type="range" id="sAmb" min="24" max="36" value="28"></div>
+<div class="row"><button class="b on" id="tPipe">Pipa gas lantai: aktif</button><button class="b" id="tSnd">Suara buzzer: mati</button></div>
+</div>
+</aside>
+<section class="card" style="grid-column:1/-1"><h1>Keterkaitan 7 Materi Fisika dengan Maket</h1><div class="sub">Klik kartu untuk menyorot bagian maket. Angka berubah live mengikuti simulasi (ukuran fan dan konstanta fisik adalah asumsi simulasi, bukan hasil ukur).</div><div id="mat" class="mgrid"></div></section>
+</div>
+
+<script>
+const $=i=>document.getElementById(i),cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+const S={flame:0,smoke:0,gas:0,amb:28,mode:'auto',manual:false,pipe:true,sound:false};
+const st={temp:28,sm:0,gc:0,fan:0,ang:0,level:'ok',latch:false,fanOn:false};
+const NS='http://www.w3.org/2000/svg',pg=$('pg'),P=[];let acc={s:0,g:0},T=0;
+const hw=y=>40+50*(cl(y,205,300)-205)/95;
+const PIPE=[[312,380],[30,380],[30,185],[184,185]],PL=[282,195,154],PT=631;
+function spawn(t){if(P.length>=230)return;const el=document.createElementNS(NS,'circle');el.setAttribute('class',t==='g'?'pgas':'ps');pg.appendChild(el);
+P.push({el,t,x:t==='g'?322+(Math.random()-.5)*6:210+(Math.random()-.5)*50,y:t==='g'?320:334,vx:(Math.random()-.5)*10,life:0,max:t==='g'?16:8+Math.random()*3,out:false});}
+function kill(i){P[i].el.remove();P.splice(i,1);}
+// api
+const fl=$('flame');for(let i=0;i<3;i++){const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 C-9 -8 -6 -18 0 -30 C6 -18 9 -8 0 0Z');p.setAttribute('fill','var(--flame)');p.setAttribute('opacity','.9');fl.appendChild(p);}
+const log=[];function addLog(m){log.unshift('['+T.toFixed(0)+' d] '+m);log.length=Math.min(log.length,6);$('log').innerHTML=log.map(x=>'<li>'+x+'</li>').join('');}
+let ac,osc,gn;
+function beep(on){try{if(!S.sound){if(gn)gn.gain.value=0;return;}
+if(!ac){ac=new(window.AudioContext||window.webkitAudioContext)();osc=ac.createOscillator();gn=ac.createGain();osc.type='square';osc.frequency.value=2200;gn.gain.value=0;osc.connect(gn).connect(ac.destination);osc.start();}
+gn.gain.value=on?0.03:0;}catch(e){}}
+function setMode(m){S.mode=m;$('mAuto').classList.toggle('on',m==='auto');$('mSemi').classList.toggle('on',m==='semi');if(m==='auto')S.manual=false;addLog('Mode '+(m==='auto'?'otomatis':'semi-otomatis'));}
+$('mAuto').onclick=()=>setMode('auto');$('mSemi').onclick=()=>setMode('semi');
+$('btn').onclick=()=>{if(S.mode==='auto')setMode('semi');S.manual=!S.manual;addLog('Tombol ditekan: kipas manual '+(S.manual?'ON':'OFF'));};
+[['sFlame','flame','oFlame','%'],['sSmoke','smoke','oSmoke','%'],['sGas','gas','oGas','%'],['sAmb','amb','oAmb','°C']].forEach(([id,k,o,u])=>{$(id).oninput=e=>{S[k]=+e.target.value;$(o).textContent=S[k]+u;};});
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const v=b.dataset.p.split(',').map(Number);['sFlame','sSmoke','sGas','sAmb'].forEach((id,i)=>{$(id).value=v[i];$(id).oninput({target:$(id)});});});
+$('tPipe').onclick=()=>{S.pipe=!S.pipe;$('pipeG').style.display=S.pipe?'':'none';$('tPipe').textContent='Pipa gas lantai: '+(S.pipe?'aktif':'mati');$('tPipe').classList.toggle('on',S.pipe);};
+$('tSnd').onclick=()=>{S.sound=!S.sound;$('tSnd').textContent='Suara buzzer: '+(S.sound?'nyala':'mati');$('tSnd').classList.toggle('on',S.sound);if(!S.sound)beep(false);};
+function tile(id,v,c){const t=$(id);t.querySelector('b').textContent=v;t.className='tile '+(c||'');}
+function step(dt){T+=dt;const f=st.fan;
+const tgtT=S.amb+S.flame*.15*(1-.4*f);st.temp+=(tgtT-st.temp)*Math.min(1,.25*dt);
+st.sm=Math.max(0,st.sm+(S.smoke*.6+S.flame*.04)*dt-st.sm*(.02+f*.3)*dt);
+st.gc=Math.max(0,st.gc+S.gas*.8*dt-st.gc*(.015+f*.08+(S.pipe?.2*(.3+f):0))*dt);
+const mq2=100+st.sm+st.gc,mq135=400+st.sm*1.2+st.gc*.25+S.flame*3,hum=cl(68-(st.temp-28)*1.4,25,90);
+let lv='ok';if(SC.on&&!SC.sys){}else if(mq2>1000||mq135>2000||st.temp>55)lv='bad';else if(mq2>400||mq135>1000||st.temp>38)lv='warn';
+if(st.temp>33)st.latch=true;else if(st.temp<31)st.latch=false;
+let tg=0;if(S.mode==='auto')tg=lv==='bad'?1:lv==='warn'?.75:st.latch?.5:0;else{tg=S.manual?.7:0;if(lv==='bad')tg=1;}if(AL.gas)tg=1;if(SC.on&&!SC.sys)tg=0;
+st.fan+=(tg-st.fan)*Math.min(1,2*dt);st.ang=(st.ang+st.fan*900*dt)%360;
+const on=st.fan>.08;if(on!==st.fanOn){st.fanOn=on;addLog('Kipas '+(on?'menyala':'mati'));}
+if(lv!==st.level){st.level=lv;addLog(lv==='bad'?'BAHAYA: buzzer + LED merah':lv==='warn'?'Waspada: LED kuning':'Kondisi aman');}
+// spawn
+acc.s+=(S.smoke*.35+S.flame*.04)*dt;acc.g+=S.gas*.3*dt;
+while(acc.s>=1){spawn('s');acc.s--;}while(acc.g>=1){spawn('g');acc.g--;}
+// particles
+for(let i=P.length-1;i>=0;i--){const p=P[i];p.life+=dt;
+if(p.pi!==undefined){p.d+=(25+200*f)*dt;let d=p.d,j=0;while(j<2&&d>PL[j]){d-=PL[j];j++;}if(p.d>=PT){delete p.pi;p.x=210;p.y=175;}else{const a=PIPE[j],b=PIPE[j+1],u=d/PL[j];p.x=a[0]+(b[0]-a[0])*u;p.y=a[1]+(b[1]-a[1])*u;}}
+else if(p.out){p.x+=(210-p.x)*4*dt;p.y-=140*dt;if(p.y<4){kill(i);continue;}}
+else{let vy=p.t==='g'?22:-14;p.vx+=(Math.random()-.5)*60*dt;p.vx*=.98;
+if(f>.05&&p.y<405&&p.y>200){const k=f*(p.y<305?1:Math.max(.25,1-(p.y-305)/100))*(p.t==='g'?.25:1);p.vx+=(210-p.x)*k*2.5*dt;vy-=120*k;}
+p.x+=p.vx*dt;p.y+=vy*dt;if(p.t==='g'){if(p.y>378)p.y=378;if(p.y>350){if(S.pipe)p.vx+=(314-p.x)*(.5+f)*dt;if(S.pipe&&p.x<328&&p.y>360){p.pi=0;p.d=0;p.out=true;}}}
+if(f>.08&&p.y<212&&Math.abs(p.x-210)<44)p.out=true;
+if(f<=.08&&p.y<305&&Math.abs(p.x-210)<95){p.y=305;p.vx=(p.x<210?-1:1)*(35+Math.random()*10);}
+if(p.y<52)p.y=52;
+if(p.life>p.max){kill(i);continue;}}
+const a=p.out?.55:cl(1-p.life/p.max,0,1)*(p.t==='g'?.6:.5);
+p.el.setAttribute('cx',p.x.toFixed(1));p.el.setAttribute('cy',p.y.toFixed(1));p.el.setAttribute('r',(p.out?4:Math.min(9,3+p.life*.9)).toFixed(1));p.el.setAttribute('opacity',a.toFixed(2));}
+// visuals
+$('blades').setAttribute('transform','rotate('+st.ang.toFixed(1)+' 210 185)');
+$('flows').setAttribute('opacity',cl(st.fan*1.2,0,1).toFixed(2));
+$('pipeF').style.opacity=S.pipe?.4+st.fan*.6:0;
+const k=S.flame/100;fl.setAttribute('visibility',k>0?'visible':'hidden');
+[...fl.children].forEach((p,i)=>{const fk=k*(1+.18*Math.sin(T*14+i*2));p.setAttribute('transform','translate('+(185+i*25)+' 338) scale('+(0.5+k*.9)+' '+(Math.max(.1,fk*1.6)).toFixed(2)+')');});
+const blink=Math.floor(T*4)%2===0;
+$('l1').style.fill=lv==='ok'?'var(--ok)':'var(--eq)';$('l2').style.fill=lv==='warn'?'var(--warn)':'var(--eq)';$('l3').style.fill=lv==='bad'&&blink?'var(--bad)':'var(--eq)';
+$('bz').style.fill=lv==='bad'&&blink?'var(--bad)':'var(--eq)';beep(lv==='bad'&&blink);
+$('btnD').style.fill=S.manual?'var(--ok)':'var(--eqs)';
+$('tMq2').textContent=Math.round(mq2);$('tMq135').textContent=Math.round(mq135);$('tDht').textContent=st.temp.toFixed(1)+'°C';
+$('bMq2').setAttribute('class','sb'+(mq2>1000?' bad':mq2>400?' warn':''));$('bMq135').setAttribute('class','sb'+(mq135>2000?' bad':mq135>1000?' warn':''));$('bDht').setAttribute('class','sb'+(st.temp>55?' bad':st.temp>38?' warn':''));
+tile('v0',st.temp.toFixed(1)+' °C',st.temp>55?'bad':st.temp>38?'warn':'');tile('v1',hum.toFixed(0)+' %');
+tile('v2',Math.round(mq2)+' ppm',mq2>1000?'bad':mq2>400?'warn':'');tile('v3',Math.round(mq135)+' ppm',mq135>2000?'bad':mq135>1000?'warn':'');
+tile('v4',on?Math.round(st.fan*100)+' %':'OFF');tile('v5',lv==='bad'?'BAHAYA':lv==='warn'?'WASPADA':'AMAN',lv==='ok'?'':lv);
+physics(dt,lv);if(!(SC.on&&!SC.sys))blynkUI(lv);const b=$('banner');b.className='banner '+lv;b.textContent=lv==='bad'?'BAHAYA: asap/gas/suhu tinggi, buzzer berbunyi':lv==='warn'?'WASPADA: kondisi udara mulai buruk':'AMAN';}
+let E=0,sel=0;
+const MAT=[
+['1. Besaran dan Vektor','Skalar: suhu (°C), kelembapan (%), konsentrasi gas (ppm), tegangan kipas 12 V. Vektor: kecepatan udara menuju kipas = hisapan vertikal + udara masuk dari samping.','R = √(vx² + vy²) , θ = arctan(vy/vx)',[110,200,200,110]],
+['2. Kinematika Partikel','Partikel asap/gas bergerak dari api kompor ke kipas. Makin cepat kipas, makin besar kecepatan partikel dan makin singkat waktu tempuhnya.','t = d / v',[185,205,50,135]],
+['3. Dinamika Partikel','Hukum Newton: kipas mendorong udara (aksi), udara mendorong balik kipas (reaksi). Gaya dorong berasal dari perubahan momentum udara yang dibuang.','F = ρ · A · v²',[175,150,70,70]],
+['4. Kinerja (Usaha) dan Energi','Energi listrik 12 V diubah jadi energi gerak kipas lalu energi kinetik udara. Api kompor menambah energi kalor yang dibuang lewat ventilasi.','P = V · I , Ek = ½ρAv³',[175,150,70,70]],
+['5. Dinamika Rotasi','Bilah kipas berputar terhadap poros. Momen inersia, kecepatan sudut, torsi, dan momentum sudut berubah mengikuti PWM/kecepatan kipas.','τ = P / ω , L = I·ω',[175,150,70,70]],
+['6. Getaran','Buzzer bergetar pada frekuensi tertentu dan menghasilkan gelombang bunyi saat status BAHAYA. Kipas yang berputar juga bergetar pada frekuensi putarannya.','T = 1/f , λ = v/f',[445,68,52,56]],
+['7. Mekanika (Fluida)','Udara mengalir dari corong lebar (Ø 5 cm) ke saluran buang (Ø 3 cm): debit tetap, jadi kecepatan naik dan tekanan turun (Bernoulli).','A₁v₁ = A₂v₂ , ΔP = ½ρ(v₂² − v₁²)',[190,6,40,160]]
+];
+const mat=$('mat');mat.innerHTML=MAT.map((m,i)=>'<div class="mc" data-i="'+i+'"><h3>'+m[0]+'</h3><p>'+m[1]+'</p><code>'+m[2]+'</code><div class="live" id="lv'+i+'"></div></div>').join('');
+mat.onclick=e=>{const c=e.target.closest('.mc');if(c)sel=+c.dataset.i;};
+function physics(dt,lv){
+const f=st.fan,rho=1.2,A1=Math.PI*.025**2,A2=Math.PI*.015**2,x=(v,n)=>v.toFixed(n);
+const v1=f*2.4,v2=v1*A1/A2,vy=v1+.05,vx=.3*f+.05,R=Math.hypot(vx,vy),th=Math.atan2(vy,vx)*180/Math.PI;
+const vp=.05+v1,tt=.30/vp,F=rho*A2*v2*v2;
+const I=.5*.03*.045**2,rpm=f*2000,w=rpm*2*Math.PI/60;
+const Pe=12*(.05+.25*f),Pm=.3*Pe,Pk=.5*rho*A2*v2**3;E+=Pe*dt;
+const tau=w>1?Pm/w:0,L=I*w,Er=.5*I*w*w;
+const Q=A1*v1*1000,dP=.5*rho*(v2*v2-v1*v1),cs=331+.6*st.temp,fb=2200,bz=lv==='bad';
+const h=[
+'v<sub>x</sub> = '+x(vx,2)+' m/s · v<sub>y</sub> = '+x(vy,2)+' m/s<br>|R| = '+x(R,2)+' m/s · θ = '+x(th,0)+'°',
+'v = '+x(vp,2)+' m/s · d = 0,30 m (kompor ke kipas)<br>t = '+x(tt,1)+' s',
+'v keluar = '+x(v2,2)+' m/s<br>F = '+x(F*1000,2)+' mN (reaksi pada kipas sama besar)',
+'P listrik = '+x(Pe,2)+' W · P mekanik = '+x(Pm,2)+' W<br>P kinetik udara = '+x(Pk,3)+' W · energi terpakai = '+x(E,1)+' J<br>Kalor api ≈ '+x(S.flame*5,0)+' W (asumsi)',
+'n = '+x(rpm,0)+' rpm · ω = '+x(w,0)+' rad/s<br>τ = '+x(tau*1000,2)+' mN·m · L = '+x(L*1000,2)+' g·m²/s<br>Ek rotasi = '+x(Er*1000,1)+' mJ',
+'Buzzer: '+(bz?'BERBUNYI':'diam')+' · f = '+fb+' Hz · T = '+x(1000/fb,2)+' ms<br>λ = '+x(cs/fb*100,1)+' cm (v bunyi '+x(cs,0)+' m/s pada '+x(st.temp,1)+' °C)<br>Getaran kipas ≈ '+x(rpm/60,1)+' Hz',
+'Debit Q = '+x(Q,2)+' L/s · v₁ = '+x(v1,2)+' m/s → v₂ = '+x(v2,2)+' m/s<br>ΔP = '+x(dP,1)+' Pa (tekanan turun di leher saluran)'
+];
+h.forEach((s,i)=>{$('lv'+i).innerHTML=s;});
+[...mat.children].forEach((c,i)=>c.classList.toggle('sel',i===sel));
+const r=MAT[sel][3],hl=$('hl');hl.setAttribute('x',r[0]);hl.setAttribute('y',r[1]);hl.setAttribute('width',r[2]);hl.setAttribute('height',r[3]);
+$('vecG').style.display=sel===0?'':'none';
+if(sel===0){const bx=170,by=300;$('vy').setAttribute('d','M'+bx+' '+by+' V'+(by-vy*40));$('vx').setAttribute('d','M'+bx+' '+by+' H'+(bx+vx*40));$('vr').setAttribute('d','M'+bx+' '+by+' L'+(bx+vx*40)+' '+(by-vy*40));}
+['w1','w2'].forEach((id,k)=>{const rr=16+((T*40+k*13)%26);$(id).setAttribute('r',rr.toFixed(1));$(id).setAttribute('opacity',bz&&Math.floor(T*4)%2===0?(1-(rr-16)/26).toFixed(2):0);});
+}
+const AL={gas:false,smoke:false,temp:false},ALD={gas:['Gas LPG bocor','gas_leak','Tutup regulator, jangan nyalakan api, buka ventilasi'],smoke:['Asap / masakan gosong','smoke_burn','Matikan kompor dan cek masakan'],temp:['Suhu ruang melebihi batas normal','temp_high','Batas normal 38 °C']};
+let hist=[],hacc=0,toastEnd=0;
+const ty=t=>80-(cl(t,20,60)-20)/40*70,gy=g=>80-cl(g,0,1500)/1500*70;
+function blynkUI(lv){
+const mq2=100+st.sm+st.gc,rd={gas:Math.round(st.gc)+' ppm LPG',smoke:Math.round(st.sm)+' ppm asap',temp:st.temp.toFixed(1)+' °C'};
+const nx={gas:AL.gas?st.gc>60:st.gc>120,smoke:AL.smoke?st.sm>100:st.sm>250,temp:AL.temp?st.temp>36:st.temp>38};
+for(const k in nx){if(nx[k]!==AL[k]){AL[k]=nx[k];if(nx[k]){toastEnd=T+6;$('toast').textContent='Notifikasi: '+ALD[k][0];addLog('Blynk.logEvent("'+ALD[k][1]+'")');}else addLog(ALD[k][0]+': kembali normal');}
+$('al_'+k).classList.toggle('on',AL[k]);$('as_'+k).textContent=AL[k]?'TERDETEKSI':'AMAN';$('ad_'+k).textContent=AL[k]?rd[k]+' · '+ALD[k][2]:'Normal · '+rd[k];}
+$('toast').classList.toggle('show',T<toastEnd);
+if(T-hacc>.5){hacc=T;hist.push([st.temp,mq2]);if(hist.length>60)hist.shift();
+$('pT').setAttribute('points',hist.map((h,i)=>i*5+','+ty(h[0]).toFixed(1)).join(' '));$('pG').setAttribute('points',hist.map((h,i)=>i*5+','+gy(h[1]).toFixed(1)).join(' '));}
+const lk=$('leak');lk.setAttribute('opacity',S.gas>0?.9:0);lk.setAttribute('r',(4+2*Math.sin(T*10)).toFixed(1));}
+let SPD=2;
+const SC={on:false,sys:true,t:0,ph:0,done:false,peak:0,det:null,chain:false,ex:null,res:{},leak:false,tm:0,t3:0,deb:[]};
+function setS(id,v){const e=$(id);if(+e.value!==v){e.value=v;e.oninput({target:e});}}
+function setPipe(v){S.pipe=v;$('pipeG').style.display=v?'':'none';$('tPipe').textContent='Pipa gas lantai: '+(v?'aktif':'mati');$('tPipe').classList.toggle('on',v);}
+function narr(h){$('narr').innerHTML=h;addLog(h.replace(/<[^>]+>/g,'').slice(0,60));}
+function renderRes(){const a=SC.res.A,b=SC.res.B;let h='';if(a||b){h='<table class="rt"><tr><th></th><th>Tanpa pengaman</th><th>Dengan Smart Kitchen</th></tr><tr><td>Puncak gas</td><td>'+(a?a.peak.toFixed(0)+'% LEL':'-')+'</td><td>'+(b?b.peak.toFixed(0)+'% LEL':'-')+'</td></tr><tr><td>Deteksi</td><td>'+(a?'tidak ada':'-')+'</td><td>'+(b?(b.det-2).toFixed(1)+' s setelah bocor':'-')+'</td></tr><tr><td>Hasil</td><td>'+(a?'LEDAKAN':'-')+'</td><td>'+(b?'Aman, tidak meledak':'-')+'</td></tr></table>';}$('scRes').innerHTML=h;}
+function scReset(){clearTimeout(SC.tm);SC.on=false;SC.done=false;SC.chain=false;SC.ex=null;SC.leak=false;
+['sFlame','sSmoke','sGas'].forEach(i=>setS(i,0));setS('sAmb',28);
+while(P.length)kill(0);st.sm=0;st.gc=0;st.temp=S.amb;st.fan=0;S.manual=false;
+Object.keys(AL).forEach(k=>{AL[k]=false;$('al_'+k).classList.remove('on');$('as_'+k).textContent='AMAN';});
+$('deb').innerHTML='';SC.deb=[];['exFl','exB','exR1','exR2','exT'].forEach(i=>$(i).setAttribute('opacity',0));$('sim').style.transform='';$('sim').classList.remove('wrecked');
+document.querySelector('.phh span').textContent='● ESP32 online (V0 sampai V5)';setPipe(true);}
+function scStart(sys,chain){scReset();SC.on=true;SC.sys=sys;SC.chain=!!chain;SC.t=0;SC.ph=0;SC.peak=0;SC.det=null;setPipe(sys);
+$('scS').textContent=sys?'berjalan: DENGAN Smart Kitchen':'berjalan: TANPA pengaman';
+narr('<b>1.</b> Dapur normal. Tabung LPG terpasang, kompor belum menyala.'+(sys?'':' <i>(Sensor, alarm, kipas, dan pipa gas dimatikan.)</i>'));}
+function finish(k){SC.done=true;$('scS').textContent='selesai';
+if(k==='aman'){SC.res.B={peak:SC.peak,det:SC.det};narr('<b>6. Aman.</b> Gas terbuang dan sistem kembali normal. Smart Kitchen memberi peringatan dini jauh sebelum gas mencapai LEL.');}
+else{SC.ex=null;$('sim').style.transform='';narr('<b>Selesai.</b> Tanpa pengaman, satu sumber api sudah cukup memicu ledakan.');}
+renderRes();if(SC.chain&&k==='ledak'){SC.chain=false;SC.tm=setTimeout(()=>scStart(true,false),4000);}}
+function explode(){SC.ph=4;SC.leak=false;SC.ex={t:0};SC.res.A={peak:SC.peak,t:SC.t};
+narr('<b>5. LEDAKAN!</b> Gas ('+SC.peak.toFixed(0)+'% LEL) sudah di rentang mudah meledak lalu bertemu api: pembakaran menjalar sangat cepat, gas panas memuai mendadak, tekanan naik, dan gelombang kejut menyebar.');
+$('sim').classList.add('wrecked');const g=$('deb');g.innerHTML='';SC.deb=[];
+for(let i=0;i<30;i++){const c=document.createElementNS(NS,'rect'),s=2+Math.random()*4;c.setAttribute('width',s);c.setAttribute('height',s);c.setAttribute('fill',i%3?'var(--flame)':'var(--ink)');g.appendChild(c);const a=Math.random()*Math.PI*2,v=150+Math.random()*350;SC.deb.push({c,x:230,y:335,vx:Math.cos(a)*v,vy:Math.sin(a)*v-100});}
+setS('sGas',0);setS('sFlame',80);setS('sSmoke',70);st.gc*=.15;}
+function scen(dt){
+const lel=st.gc/10,sim=$('sim');
+$('lelF').style.left=Math.min(100,lel/6)+'%';$('lelT').textContent='Gas LPG di ruang ≈ '+lel.toFixed(0)+'% LEL'+(lel>=100?' (masuk rentang mudah meledak)':lel>=20?' (berbahaya)':'');
+const gh=Math.min(300,lel*1.4);$('gasL').setAttribute('y',390-gh);$('gasL').setAttribute('height',gh);
+if(SC.ex){const e=SC.ex;e.t+=dt;const x=e.t;
+$('exFl').setAttribute('opacity',((x<.08?x/.08:Math.max(0,1-(x-.08)/.5))*.8).toFixed(2));
+$('exB').setAttribute('r',(330*(1-Math.exp(-x*5))).toFixed(0));$('exB').setAttribute('opacity',x<1.2?1:Math.max(0,1-(x-1.2)/1.5).toFixed(2));
+[['exR1',0],['exR2',.2]].forEach(([id,d])=>{const y=Math.max(0,x-d);$(id).setAttribute('r',(560*(1-Math.exp(-y*2.2))).toFixed(0));$(id).setAttribute('opacity',y>0?Math.max(0,1-y/1.8).toFixed(2):0);});
+$('exT').setAttribute('opacity',x>.1&&x<3.5?1:0);
+sim.style.transform=x<1?'translate('+((Math.random()-.5)*14*(1-x)).toFixed(1)+'px,'+((Math.random()-.5)*14*(1-x)).toFixed(1)+'px)':'';
+SC.deb.forEach(d=>{d.vy+=300*dt;d.x+=d.vx*dt;d.y+=d.vy*dt;d.c.setAttribute('x',d.x.toFixed(0));d.c.setAttribute('y',d.y.toFixed(0));d.c.setAttribute('opacity',Math.max(0,1-x/3).toFixed(2));});
+if(x>6&&!SC.done)finish('ledak');}
+if(!SC.on)return;
+const off=!SC.sys;document.querySelector('.phh span').textContent=off?'○ ESP32 mati (tanpa pengaman)':'● ESP32 online (V0 sampai V5)';
+if(off){$('banner').className='banner';$('banner').textContent='SISTEM PENGAMAN NONAKTIF';document.querySelectorAll('.tile b').forEach(b=>b.textContent='offline');}
+if(SC.done)return;
+SC.t+=dt;const t=SC.t;SC.peak=Math.max(SC.peak,lel);
+if(SC.ph===0&&t>=2){SC.ph=1;SC.leak=true;narr('<b>2.</b> Katup/selang tabung bocor. LPG lebih berat dari udara: turun lalu menumpuk di lantai.');}
+if(SC.leak)setS('sGas',Math.min(100,Math.round((t-2)*40)));
+if(SC.ph===1&&(SC.sys?AL.gas:lel>=20)){SC.ph=2;SC.det=t;narr(SC.sys?'<b>3.</b> MQ-2 mendeteksi gas melewati batas: <b>buzzer berbunyi</b>, notifikasi Blynk <code>gas_leak</code> terkirim, kipas 100% dan pipa gas menyedot gas dari dekat tabung.':'<b>3.</b> Tanpa sensor dan alarm, kebocoran tidak terdeteksi. Gas terus menumpuk di lantai ('+lel.toFixed(0)+'% LEL).');}
+if(SC.ph===2&&(SC.sys?t>=SC.det+4:lel>=60)){SC.ph=3;SC.t3=t;setS('sFlame',30);narr('<b>4.</b> Penghuni menyalakan kompor (sumber api). '+(SC.sys?'Gas masih jauh di bawah LEL ('+lel.toFixed(0)+'%).':'Gas sudah '+lel.toFixed(0)+'% LEL dan masih naik.'));}
+if(SC.ph===3&&!SC.sys&&lel>=100)explode();
+if(SC.ph===3&&SC.sys&&t>=SC.t3+6){SC.ph=4;SC.leak=false;setS('sGas',0);setS('sFlame',0);narr('<b>5.</b> Puncak gas hanya '+SC.peak.toFixed(0)+'% LEL, jadi tidak meledak. Regulator ditutup, kipas dan pipa menuntaskan pembuangan gas.');}
+if(SC.ph===4&&SC.sys&&lel<5)finish('aman');}
+$('scA').onclick=()=>scStart(false,false);$('scB').onclick=()=>scStart(true,false);$('scAB').onclick=()=>{SC.res={};renderRes();scStart(false,true);};
+$('scR').onclick=()=>{scReset();SC.res={};renderRes();$('scS').textContent='siap';narr('Pilih skenario, lalu simulasi berjalan sendiri: kebocoran, gas menumpuk, sumber api, dan hasilnya.');};
+$('scSp').onchange=e=>{SPD=+e.target.value;};
+let last=0;function loop(ts){const dt=Math.min(.05,(ts-last)/1000||.016);last=ts;step(dt*SPD);scen(dt*SPD);requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
